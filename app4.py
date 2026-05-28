@@ -111,31 +111,50 @@ if st.button("Process Video"):
         with st.spinner("Fetching transcript and processing chunks..."):
             try:
                 # 1. Create a requests session
+                # 1. Create a requests session
                 session = requests.Session()
 
                 # --- ADD A BROWSER USER-AGENT ---
                 session.headers.update({
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
                     'Accept-Language': 'en-US,en;q=0.9'
                 })
+                # ---------------------------------
 
-                # 2. Load the cookies.txt file
-                cookie_jar = MozillaCookieJar('cookies.txt')
-                cookie_jar.load(ignore_discard=True, ignore_expires=True)
+                # 2. Load JSON cookies from Streamlit secrets or local file
+                import json
+                
+                if "YOUTUBE_COOKIES_JSON" in st.secrets:
+                    # Parse JSON from Streamlit Cloud Secrets
+                    cookies_list = json.loads(st.secrets["YOUTUBE_COOKIES_JSON"])
+                else:
+                    # Fallback to local cookies.json file for local testing
+                    with open("cookies.json", "r", encoding="utf-8") as f:
+                        cookies_list = json.load(f)
 
-                # 3. Clean the cookies: Remove any that contain non-ASCII characters
-                for cookie in list(cookie_jar):
+                # 3. Load cookies into session
+                for cookie in cookies_list:
+                    # Remove non-ASCII characters to prevent encoding crashes
                     try:
-                        cookie.name.encode('ascii')
-                        cookie.value.encode('ascii')
-                    except UnicodeEncodeError:
-                        # If a cookie contains invalid characters, remove it
-                        cookie_jar.clear(cookie.domain, cookie.path, cookie.name)
+                        name = cookie['name'].encode('ascii').decode('ascii')
+                        value = cookie['value'].encode('ascii').decode('ascii')
+                        domain = cookie['domain'].encode('ascii').decode('ascii')
+                        path = cookie.get('path', '/').encode('ascii').decode('ascii')
+                        
+                        session.cookies.set(
+                            name=name,
+                            value=value,
+                            domain=domain,
+                            path=path
+                        )
+                    except (UnicodeEncodeError, KeyError):
+                        continue
 
-                session.cookies = cookie_jar
-                # --- ADD THESE DEBUGLINES ---
-                loaded_count = len(list(cookie_jar))
-                st.info(f"⚙️ Debug: Successfully loaded {loaded_count} cookies from secrets.")
+                # Debug loaded cookies count
+                loaded_count = len(session.cookies)
+                st.info(f"⚙️ Debug: Successfully loaded {loaded_count} JSON cookies.")
+
+                # 4. Initialize YouTubeTranscriptApi with the authenticated session
 
                 # 4. Initialize YouTubeTranscriptApi with the authenticated session
                 api = YouTubeTranscriptApi(http_client=session)
