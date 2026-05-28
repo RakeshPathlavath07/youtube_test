@@ -113,6 +113,12 @@ if st.button("Process Video"):
                 # 1. Create a requests session
                 session = requests.Session()
 
+                # --- ADD A BROWSER USER-AGENT ---
+                session.headers.update({
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                    'Accept-Language': 'en-US,en;q=0.9'
+                })
+
                 # 2. Load the cookies.txt file
                 cookie_jar = MozillaCookieJar('cookies.txt')
                 cookie_jar.load(ignore_discard=True, ignore_expires=True)
