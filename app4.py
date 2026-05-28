@@ -14,7 +14,20 @@ from langchain_core.runnables import RunnableParallel, RunnablePassthrough, Runn
 from langchain_core.output_parsers import StrOutputParser
 
 # Load environment variables
+# Load environment variables
 load_dotenv()
+
+# --- STREAMLIT CLOUD COMPATIBILITY ---
+# If running on Streamlit Cloud, load Hugging Face token and YouTube cookies from Secrets
+if "HF_TOKEN" in st.secrets:
+    hf_token = st.secrets["HF_TOKEN"]
+else:
+    hf_token = os.getenv("HUGGINGFACEHUB_API_TOKEN") or os.getenv("HF_TOKEN")
+
+if "YOUTUBE_COOKIES" in st.secrets:
+    with open("cookies.txt", "w", encoding="utf-8") as f:
+        f.write(st.secrets["YOUTUBE_COOKIES"])
+# -------------------------------------
 
 hf_token = os.getenv("HUGGINGFACEHUB_API_TOKEN") or os.getenv("HF_TOKEN")
 
