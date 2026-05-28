@@ -186,11 +186,7 @@ if st.button("Process Video"):
             except TranscriptsDisabled:
                 st.error("Captions are disabled/unavailable for this video.")
             except Exception as e:
-                if "blocking requests from your IP" in str(e) or "cloud provider" in str(e):
-                    st.error("⚠️ YouTube is currently blocking automatic transcript requests from Streamlit's cloud servers.")
-                    st.info("Please use the **Manual Transcript Fallback** option below to paste the transcript text directly.")
-                else:
-                    st.error(f"Failed to process video: {e}")
+             st.error(f"Failed to process video: {e}")
 
 # Expandable Fallback Input Section
 st.markdown("---")
