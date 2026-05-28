@@ -127,6 +127,9 @@ if st.button("Process Video"):
                         cookie_jar.clear(cookie.domain, cookie.path, cookie.name)
 
                 session.cookies = cookie_jar
+                # --- ADD THESE DEBUGLINES ---
+                loaded_count = len(list(cookie_jar))
+                st.info(f"⚙️ Debug: Successfully loaded {loaded_count} cookies from secrets.")
 
                 # 4. Initialize YouTubeTranscriptApi with the authenticated session
                 api = YouTubeTranscriptApi(http_client=session)
